@@ -8,6 +8,8 @@ redisPipe.stdout.setEncoding('utf8');
 redisPipe.stdout.pipe(process.stdout);
 redisPipe.stderr.pipe(process.stderr);
 
+var buf = '';
+
 var start = Date.now();
 async.times(1000000, function(n, cb) {
   if (n % 10000 === 0) {
@@ -29,9 +31,13 @@ async.times(1000000, function(n, cb) {
   ];
 
   var msg = out.join('\r\n') + '\r\n';
-  //console.log(msg);
 
-  redisPipe.stdin.write(msg);
+  buf += msg;
+  if (buf.length > (1 << 19)) {
+    redisPipe.stdin.write(buf);
+    buf = '';
+  }
+
   cb();
 }, function() {
   redisPipe.stdin.end();
