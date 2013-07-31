@@ -40,5 +40,6 @@ async.times(1000000, function(n, cb) {
 
   cb();
 }, function() {
+  redisPipe.stdin.write(buf);
   redisPipe.stdin.end();
 });
